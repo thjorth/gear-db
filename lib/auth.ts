@@ -57,5 +57,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/sign-in",
   },
+  callbacks: {
+    async signIn({ user }) {
+      if (user.id && user.name) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            fullName: user.name,
+          },
+        });
+      }
+
+      return true;
+    },
+  },
   providers: getProviders(),
 });

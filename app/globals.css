@@ -147,6 +147,29 @@ nav {
   margin-top: 24px;
 }
 
+.form-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.input {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--text);
+}
+
+.input[readonly] {
+  background: #f1f5f9;
+  color: var(--muted);
+}
+
 footer {
   margin-top: auto;
   padding: 32px 0;
