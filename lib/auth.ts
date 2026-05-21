@@ -5,13 +5,48 @@ import GitHubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import type { Provider } from "next-auth/providers";
 
-const requireEnv = (name: string) => {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing environment variable: ${name}`);
+const getProviders = (): Provider[] => {
+  const providers: Provider[] = [];
+
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    );
   }
-  return value;
+
+  if (process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET) {
+    providers.push(
+      FacebookProvider({
+        clientId: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+      })
+    );
+  }
+
+  if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
+    providers.push(
+      AppleProvider({
+        clientId: process.env.APPLE_CLIENT_ID,
+        clientSecret: process.env.APPLE_CLIENT_SECRET,
+      })
+    );
+  }
+
+  if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+    providers.push(
+      GitHubProvider({
+        clientId: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      })
+    );
+  }
+
+  return providers;
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -22,22 +57,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/sign-in",
   },
-  providers: [
-    GoogleProvider({
-      clientId: requireEnv("GOOGLE_CLIENT_ID"),
-      clientSecret: requireEnv("GOOGLE_CLIENT_SECRET"),
-    }),
-    FacebookProvider({
-      clientId: requireEnv("FACEBOOK_CLIENT_ID"),
-      clientSecret: requireEnv("FACEBOOK_CLIENT_SECRET"),
-    }),
-    AppleProvider({
-      clientId: requireEnv("APPLE_CLIENT_ID"),
-      clientSecret: requireEnv("APPLE_CLIENT_SECRET"),
-    }),
-    GitHubProvider({
-      clientId: requireEnv("GITHUB_CLIENT_ID"),
-      clientSecret: requireEnv("GITHUB_CLIENT_SECRET"),
-    }),
-  ],
+  providers: getProviders(),
 });

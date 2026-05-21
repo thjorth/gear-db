@@ -17,7 +17,7 @@ export default function SocialSignInButton({
     <button
       className="social-button"
       type="button"
-      onClick={() => signIn(providerId)}
+      onClick={() => signIn(providerId, { callbackUrl: "/profile" })}
     >
       <div>
         Continue with {provider}
