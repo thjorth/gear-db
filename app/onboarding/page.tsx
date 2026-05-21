@@ -1,47 +1,17 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { isProfileComplete } from "@/lib/user-profile";
 import ProfileOnboardingForm from "@/components/ProfileOnboardingForm";
+import { requireCurrentUser } from "@/lib/current-user";
+import { isProfileComplete } from "@/lib/user-profile";
 
 type OnboardingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
-  const session = await auth();
+  const user = await requireCurrentUser();
 
-  if (!session?.user?.email) {
-    redirect("/sign-in");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: {
-      email: true,
-      name: true,
-      fullName: true,
-      screenName: true,
-      country: true,
-      city: true,
-    },
-  });
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  const fullName = user.fullName ?? user.name ?? "";
-
-  if (!user.fullName && fullName) {
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: { fullName },
-    });
-  }
-
-  if (isProfileComplete({ ...user, fullName })) {
+  if (isProfileComplete(user)) {
     redirect("/profile");
   }
 
@@ -60,7 +30,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
 
         <ProfileOnboardingForm
           email={user.email ?? ""}
-          fullName={fullName}
+          fullName={user.fullName}
           defaultScreenName={user.screenName ?? ""}
           defaultCountry={user.country ?? ""}
           defaultCity={user.city ?? ""}

@@ -1,44 +1,26 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { isProfileComplete } from "@/lib/user-profile";
+import { requireOnboardedUser } from "@/lib/current-user";
 
 export default async function ProfilePage() {
-  const session = await auth();
+  const user = await requireOnboardedUser();
 
-  if (!session?.user?.email) {
-    redirect("/sign-in");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+  const gearItems = await prisma.gearItem.findMany({
+    where: {
+      ownerId: user.id,
+      deletedAt: null,
+    },
     select: {
-      email: true,
-      fullName: true,
-      name: true,
-      screenName: true,
-      country: true,
-      city: true,
+      id: true,
+      brand: true,
+      model: true,
+      category: true,
+      estimatedValue: true,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  const fullName = user.fullName ?? user.name ?? "";
-
-  if (!user.fullName && fullName) {
-    await prisma.user.update({
-      where: { email: session.user.email },
-      data: { fullName },
-    });
-  }
-
-  if (!isProfileComplete({ ...user, fullName })) {
-    redirect("/onboarding");
-  }
 
   return (
     <main className="container section">
@@ -53,7 +35,7 @@ export default async function ProfilePage() {
           <div className="card">
             <strong>Account</strong>
             <p style={{ color: "var(--muted)", marginTop: 8 }}>
-              {fullName} · @{user.screenName}
+              {user.fullName} · @{user.screenName}
             </p>
             <p style={{ color: "var(--muted)", marginTop: 8 }}>
               {user.city}, {user.country}
@@ -62,8 +44,19 @@ export default async function ProfilePage() {
           <div className="card">
             <strong>Inventory</strong>
             <p style={{ color: "var(--muted)", marginTop: 8 }}>
-              0 items tracked · Add your first guitar or synth.
+              {gearItems.length} items tracked
             </p>
+            <ul style={{ marginTop: 10, paddingLeft: 18, color: "var(--muted)" }}>
+              {gearItems.slice(0, 5).map((item) => (
+                <li key={item.id} style={{ marginBottom: 8 }}>
+                  <Link href={`/gear/${item.id}/edit`}>
+                    {item.brand} {item.model}
+                  </Link>{" "}
+                  ({item.category.toLowerCase()})
+                </li>
+              ))}
+              {gearItems.length === 0 ? <li>No gear yet.</li> : null}
+            </ul>
           </div>
           <div className="card">
             <strong>Insurance exports</strong>
@@ -74,7 +67,7 @@ export default async function ProfilePage() {
         </div>
 
         <div style={{ marginTop: 24, display: "flex", gap: 12 }}>
-          <Link className="button primary" href="/">
+          <Link className="button primary" href="/gear/new">
             Add gear item
           </Link>
           <Link className="button" href="/sign-in">

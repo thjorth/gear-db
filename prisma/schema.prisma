@@ -8,19 +8,55 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL")
 }
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
   fullName      String?
-  screenName    String?   @unique
-  email         String?   @unique
+  screenName    String?    @unique
+  email         String?    @unique
   country       String?
   city          String?
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  gearItems     GearItem[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model GearItem {
+  id             String       @id @default(cuid())
+  ownerId        String
+  category       GearCategory @default(OTHER)
+  brand          String
+  model          String
+  serialNumber   String?
+  year           Int?
+  purchaseDate   DateTime?
+  purchasePrice  Float?
+  currency       String?
+  estimatedValue Float?
+  condition      String?
+  description    String?
+  tags           String[]     @default([])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  owner          User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, deletedAt])
+  @@index([serialNumber])
+}
+
+
+enum GearCategory {
+  GUITAR
+  SYNTH
+  AMP
+  PEDAL
+  MIC
+  INTERFACE
+  OTHER
 }
 
 model Account {
