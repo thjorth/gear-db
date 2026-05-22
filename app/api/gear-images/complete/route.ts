@@ -34,14 +34,17 @@ const streamToBuffer = async (
     const arrayBuffer = await stream.arrayBuffer();
     return Buffer.from(arrayBuffer);
   }
-  const reader = stream.getReader();
-  const chunks: Uint8Array[] = [];
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    if (value) chunks.push(value);
+  if ("getReader" in stream) {
+    const reader = stream.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) chunks.push(value);
+    }
+    return Buffer.concat(chunks);
   }
-  return Buffer.concat(chunks);
+  return Buffer.alloc(0);
 };
 
 export async function POST(request: Request) {
