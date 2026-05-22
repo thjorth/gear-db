@@ -20,7 +20,7 @@ import {
 } from "@/lib/gear-images";
 
 const streamToBuffer = async (
-  stream: Readable | ReadableStream | null | undefined
+  stream: Readable | ReadableStream | Blob | null | undefined
 ) => {
   if (!stream) return Buffer.alloc(0);
   if (stream instanceof Readable) {
@@ -29,6 +29,10 @@ const streamToBuffer = async (
       chunks.push(Buffer.from(chunk));
     }
     return Buffer.concat(chunks);
+  }
+  if (typeof Blob !== "undefined" && stream instanceof Blob) {
+    const arrayBuffer = await stream.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   }
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
