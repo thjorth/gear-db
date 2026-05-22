@@ -20,6 +20,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   gearItems     GearItem[]
+  gearImages    GearImage[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -43,9 +44,25 @@ model GearItem {
   updatedAt      DateTime     @updatedAt
   deletedAt      DateTime?
   owner          User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  images         GearImage[]
 
   @@index([ownerId, deletedAt])
   @@index([serialNumber])
+}
+
+model GearImage {
+  id         String   @id @default(cuid())
+  ownerId    String
+  gearItemId String
+  originalKey String
+  fullKey    String
+  thumbKey   String
+  createdAt  DateTime @default(now())
+  gearItem   GearItem @relation(fields: [gearItemId], references: [id], onDelete: Cascade)
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([gearItemId])
+  @@index([ownerId])
 }
 
 

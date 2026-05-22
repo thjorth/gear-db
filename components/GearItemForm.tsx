@@ -1,4 +1,5 @@
 import { GearCategory } from "@prisma/client";
+import GearImageUploader from "@/components/GearImageUploader";
 
 type GearItemFormValues = {
   id?: string;
@@ -165,6 +166,14 @@ export default function GearItemForm({
         rows={4}
         defaultValue={values?.description ?? ""}
       />
+
+      {values?.id ? (
+        <GearImageUploader gearItemId={values.id} />
+      ) : (
+        <p style={{ fontSize: 13, color: "#6b7280" }}>
+          Save this item to upload photos.
+        </p>
+      )}
 
       {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
 

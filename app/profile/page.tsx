@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireOnboardedUser } from "@/lib/current-user";
+import SignOutButton from "@/components/SignOutButton";
 
 export default async function ProfilePage() {
   const user = await requireOnboardedUser();
@@ -70,9 +71,7 @@ export default async function ProfilePage() {
           <Link className="button primary" href="/gear/new">
             Add gear item
           </Link>
-          <Link className="button" href="/sign-in">
-            Switch account
-          </Link>
+          <SignOutButton className="button" />
         </div>
       </div>
     </main>
