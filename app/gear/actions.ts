@@ -20,6 +20,7 @@ type GearInput = {
   condition: string | null;
   description: string | null;
   tags: string[];
+  isPublic: boolean;
 };
 
 const clean = (value: FormDataEntryValue | null) =>
@@ -51,6 +52,7 @@ const parseGearInput = (formData: FormData): GearInput => {
   const condition = clean(formData.get("condition"));
   const description = clean(formData.get("description"));
   const tagsRaw = clean(formData.get("tags"));
+  const isPublic = formData.get("isPublic") === "on";
 
   if (!brand || !model) {
     throw new Error("Brand and model are required.");
@@ -98,6 +100,7 @@ const parseGearInput = (formData: FormData): GearInput => {
     condition: toNullable(condition),
     description: toNullable(description),
     tags,
+    isPublic,
   };
 };
 

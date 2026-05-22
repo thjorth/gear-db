@@ -7,6 +7,7 @@ export default function HomePage() {
         <nav>
           <strong>Gear DB</strong>
           <div className="nav-links">
+            <Link href="/public-gear">Public gear</Link>
             <Link href="/sign-in">Sign in</Link>
             <Link href="/profile">Profile</Link>
           </div>

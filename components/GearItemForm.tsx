@@ -15,6 +15,7 @@ type GearItemFormValues = {
   condition?: string | null;
   description?: string | null;
   tags?: string[];
+  isPublic?: boolean;
 };
 
 type GearItemFormProps = {
@@ -166,6 +167,19 @@ export default function GearItemForm({
         rows={4}
         defaultValue={values?.description ?? ""}
       />
+
+      <label className="label" htmlFor="isPublic">
+        Public sharing
+      </label>
+      <label style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <input
+          id="isPublic"
+          name="isPublic"
+          type="checkbox"
+          defaultChecked={values?.isPublic ?? true}
+        />
+        Allow this gear to appear in the public showcase.
+      </label>
 
       {values?.id ? (
         <GearImageUploader gearItemId={values.id} />
