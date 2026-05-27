@@ -1,17 +1,8 @@
 import Link from "next/link";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prisma } from "@/lib/prisma";
-import { r2Client, r2Config } from "@/lib/r2";
 
-const buildSignedImage = async (key: string | null) => {
-  if (!key) return null;
-  return getSignedUrl(
-    r2Client,
-    new GetObjectCommand({ Bucket: r2Config.bucket, Key: key }),
-    { expiresIn: 300 }
-  );
-};
+const buildPublicImageUrl = (imageId: string, size: "thumb" | "full") =>
+  `/public-gear/image/${imageId}?size=${size}`;
 
 export default async function PublicGearPage() {
   const gearItems = await prisma.gearItem.findMany({
@@ -30,8 +21,7 @@ export default async function PublicGearPage() {
       tags: true,
       images: {
         select: {
-          thumbKey: true,
-          fullKey: true,
+          id: true,
         },
         orderBy: { createdAt: "asc" },
         take: 1,
@@ -40,18 +30,14 @@ export default async function PublicGearPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const items = await Promise.all(
-    gearItems.map(async (item) => {
-      const image = item.images[0];
-      const thumbUrl = await buildSignedImage(image?.thumbKey ?? null);
-      const fullUrl = await buildSignedImage(image?.fullKey ?? null);
-      return {
-        ...item,
-        thumbUrl,
-        fullUrl,
-      };
-    })
-  );
+  const items = gearItems.map((item) => {
+    const imageId = item.images[0]?.id;
+    return {
+      ...item,
+      thumbUrl: imageId ? buildPublicImageUrl(imageId, "thumb") : null,
+      fullUrl: imageId ? buildPublicImageUrl(imageId, "full") : null,
+    };
+  });
 
   return (
     <>
